@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -270,9 +270,9 @@ void DeviceGpu::setXrandrInfo(const QMap<QString, QString> &mapInfo)
 {
     qCDebug(appLog) << "DeviceGpu::setXrandrInfo started.";
     // 设置分辨率属性
-    m_MinimumResolution = mapInfo["minResolution"];
-    m_CurrentResolution = mapInfo["curResolution"];
-    m_MaximumResolution = mapInfo["maxResolution"];
+    m_MinimumResolution = mapInfo["minResolution"].replace('x', "×", Qt::CaseInsensitive).remove(' ');;
+    m_CurrentResolution = mapInfo["curResolution"].replace('x', "×", Qt::CaseInsensitive).remove(' ');;
+    m_MaximumResolution = mapInfo["maxResolution"].replace('x', "×", Qt::CaseInsensitive).remove(' ');;
     qCDebug(appLog) << "Resolutions set: Min=" << m_MinimumResolution << ", Cur=" << m_CurrentResolution << ", Max=" << m_MaximumResolution;
 
     // 设置显卡支持的接口
