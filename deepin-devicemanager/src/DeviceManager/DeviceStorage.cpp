@@ -137,6 +137,40 @@ static quint64 convertToBytes(const QString& size, double scale)
     return diskBytesSize;
 }
 
+QString DeviceStorage::cleanCapabilitiesForDisplay(const QString &caps, const QString &partTableType)
+{
+    if (caps.isEmpty())
+        return caps;
+
+    QStringList tokens = caps.split(" ", QString::SkipEmptyParts);
+    bool hasPartitionedScheme = false;
+    foreach (const QString &t, tokens) {
+        if (t.startsWith("partitioned:")) {
+            hasPartitionedScheme = true;
+            break;
+        }
+    }
+
+    QStringList result;
+    foreach (const QString &t, tokens) {
+        // 当存在带值的 partitioned:<scheme> 时,跳过冗余的裸 partitioned
+        if (hasPartitionedScheme && t == "partitioned")
+            continue;
+
+        if (!partTableType.isEmpty() && t.startsWith("partitioned:")) {
+            result.append("partitioned:" + partTableType);
+            continue;
+        }
+
+        if (!partTableType.isEmpty() && !hasPartitionedScheme && t == "partitioned") {
+            result.append("partitioned:" + partTableType);
+            continue;
+        }
+
+        result.append(t);
+    }
+    return result.join(" ");
+}
 void DeviceStorage::unitConvertByDecimal()
 {
     qCDebug(appLog) << "DeviceStorage::unitConvertByDecimal";
@@ -154,7 +188,7 @@ bool DeviceStorage::setHwinfoInfo(const QMap<QString, QString> &mapInfo)
         return false;
     }
 
-    if (Common::specialComType <= 0) {
+    if (!Common::isHwPlatform()) {
         setAttribute(mapInfo, "Model", m_Name);
     }
     setAttribute(mapInfo, "Vendor", m_Vendor);
@@ -528,8 +562,7 @@ void DeviceStorage::appendDisk(DeviceStorage *device)
 
 void DeviceStorage::checkDiskSize()
 {
-    qCDebug(appLog) << "DeviceStorage::checkDiskSize";
-    if (Common::specialComType <= 0) {
+    if (!Common::isHwPlatform()) {
         return; //定制机型专用，其它慎用
     }
     quint64 gbyte =  1000000000;
@@ -655,8 +688,8 @@ void DeviceStorage::loadBaseDeviceInfo()
 {
     qCDebug(appLog) << "DeviceStorage::loadBaseDeviceInfo";
     // 添加基本信息
-    addBaseDeviceInfo("Name", m_Name);
-    if (Common::specialComType <= 0) {
+    addBaseDeviceInfo(("Name"), m_Name);
+    if (!Common::isHwPlatform()) {
         addBaseDeviceInfo(("Vendor"), m_Vendor);
     }
     addBaseDeviceInfo("Media Type", translateStr(m_MediaType));
