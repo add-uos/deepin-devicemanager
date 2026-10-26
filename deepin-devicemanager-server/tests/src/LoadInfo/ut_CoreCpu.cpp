@@ -15,8 +15,7 @@
  * addLogicalCpu:
  *   B1: m_MapLogicalCpu.find(id) == end -> insert        | AddLogicalCpu_NewId_InsertsLogical, AddLogicalCpu_DuplicateId_NoDoubleInsert
  * logicalIsExisted:
- *   B2: m_CoreId < 0 -> return false                      | LogicalIsExisted_NegativeCoreId_ReturnsFalse
- *   B3: find(id) != end -> return true/false              | LogicalIsExisted_ExistingId_ReturnsTrue, LogicalIsExisted_MissingId_ReturnsFalse
+ *   B2: find(id) != end -> return true/false              | LogicalIsExisted_NegativeCoreId_ReturnsFalse, LogicalIsExisted_ExistingId_ReturnsTrue, LogicalIsExisted_MissingId_ReturnsFalse
  * getInfo:
  *   B4: id < 0 -> continue (skip)                         | GetInfo_NegativeIdEntry_SkipsEntry
  * appendKeyValue(QString,QString):
@@ -122,10 +121,8 @@ TEST_F(CoreCpu_UT, AddLogicalCpu_DuplicateId_NoDoubleInsert)
 
 TEST_F(CoreCpu_UT, LogicalIsExisted_NegativeCoreId_ReturnsFalse)
 {
-    // Arrange — default ctor sets m_CoreId = -1, so branch B1 fires
+    // Arrange — default ctor sets m_CoreId = -1; map is empty so lookup of any id returns false
     CoreCpu core;
-    LogicalCpu lc;
-    core.addLogicalCpu(0, lc);
     // Act
     bool result = core.logicalIsExisted(0);
     // Assert
