@@ -327,6 +327,7 @@ bool CmdTool::parseOemTomlInfo(const QString &filename)
 
     if (!classkey.isEmpty() &&  itemMap.count()) {
         addMapInfo("toml" + classkey, itemMap);
+        tomlPars = true;
     }
 
     qCInfo(appLog) << "CmdTool::parseOemTomlInfo end, result:" << tomlPars;
@@ -742,7 +743,7 @@ void CmdTool::addWidthToMap(QMap<QString, QString> &mapInfo)
     sInfo = process.readAllStandardOutput();
     QStringList lines = sInfo.split("\n");
     foreach (const QString &line, lines) {
-        QRegularExpression reg("\\s\\sAttribute\\s'GPUMemoryInterface' \\(.*\\):\\s([0-9]{2}).*");
+        QRegularExpression reg("\\s\\sAttribute\\s'GPUMemoryInterface' \\(.*\\):\\s([0-9]+).*");
         if (reg.match(line).hasMatch()) {
             mapInfo.insert("Width", reg.match(line).captured(1) + " bits");
             // qCDebug(appLog) << "Found width:" << mapInfo["Width"];
@@ -1109,7 +1110,7 @@ void CmdTool::loadNvidiaSettingInfo(const QString &key, const QString &debugfile
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                     QStringList strList = memoryItem.split(':', QString::SkipEmptyParts);
 #else
-                    QStringList strList = memoryItem.split(' ', Qt::SkipEmptyParts);
+                    QStringList strList = memoryItem.split(':', Qt::SkipEmptyParts);
 #endif
                     if (strList.size() != 2) {
                         break;
@@ -1150,7 +1151,7 @@ void CmdTool::loadNvidiaSettingInfo(const QString &key, const QString &debugfile
             arguments << "-q" << "VideoRam";
             if (getDeviceInfoFromCmd(deviceInfo, program, arguments)) {
                 qCDebug(appLog) << "nvidia-settings -q VideoRam output:" << deviceInfo;
-                QRegularExpression reg("[\\s\\S]*VideoRam[\\s\\S]*([0-9]{4,})[\\s\\S]*");
+                QRegularExpression reg("VideoRam.*:\\s*([0-9]+)");
                 QStringList list = deviceInfo.split("\n");
 
                 foreach (QString item, list) {
